@@ -5,8 +5,8 @@ const File = require('./file.js');
 
 const r = {
   basicURL: 'https://www.tastingpoland.com/language/verb/',
-  cacheFile: `${__dirname}/verbs.json`,
-  imageFolder: `${__dirname}/images/`,
+  cacheFile: `${__dirname}/src/verbs.json`,
+  imageFolder: `${__dirname}/public/images/`,
   logPrefix: 'POLVERB:',
 }
 
@@ -46,9 +46,11 @@ const getVerbList = async () => {
           verbsObj[verb].list.push(a.textContent);
         } else {
           verbsObj[verb] = {
+            verb: verb.split('_')[0],
+            fullVerb: verb,
             list: [a.textContent],
             link: a.href,
-            img: r.basicURL + verb + '_verb.png'
+            img: verb + '_verb.png'
           }
         }
       });
@@ -71,7 +73,7 @@ const getVerbList = async () => {
 
   const imageFile = new File(r.imageFolder, r.logPrefix);
 
-  const verbsImageLinks = Object.values(verbList).map((verb) => verb.img);
+  const verbsImageLinks = Object.values(verbList).map((verb) => r.basicURL + verb.img);
 
   await imageFile.downloadAll(verbsImageLinks);
 })();

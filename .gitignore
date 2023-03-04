@@ -1,4 +1,4 @@
-images
+public/images
 node_modules
-verbs.json
+src/verbs.json
 .idea
