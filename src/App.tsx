@@ -8,7 +8,7 @@ export const App = () => {
     return (
         <Flex direction="column" minH="100vh">
             <Header />
-            <Container as="main" maxW={'6xl'} w={'100%'} p={1} flexGrow={1} centerContent>
+            <Container as="main" maxW={'6xl'} w={'100%'} p={3} flexGrow={1} centerContent>
                 <SearchForm />
             </Container>
             <Footer />

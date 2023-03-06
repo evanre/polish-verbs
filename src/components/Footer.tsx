@@ -8,7 +8,7 @@ import {
     VisuallyHidden,
     useColorModeValue,
 } from '@chakra-ui/react';
-import { FaTwitter } from 'react-icons/fa';
+import { CgWebsite } from 'react-icons/cg';
 
 const SocialButton = ({
     children,
@@ -51,11 +51,13 @@ export const Footer = () => (
             direction={{base: 'column', md: 'row'}}
             spacing={4}
             justify={{base: 'center', md: 'space-between'}}
-            align={{base: 'center', md: 'center'}}>
+            align={{base: 'center', md: 'center'}}
+            textAlign={'center'}
+        >
             <Text>© {(new Date).getFullYear()} Yevhen Zhuchenko. All rights reserved</Text>
             <Stack direction={'row'} spacing={6}>
-                <SocialButton label={'Twitter'} href={'#'}>
-                    <FaTwitter/>
+                <SocialButton label={'Website'} href={'https://zhuchenko.net'}>
+                    <CgWebsite />
                 </SocialButton>
             </Stack>
         </Container>

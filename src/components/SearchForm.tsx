@@ -1,18 +1,26 @@
 import * as React from 'react';
 import Fuse from 'fuse.js';
 import {
+    Box,
     Flex,
     FormControl,
     Text,
     Heading,
     Input,
     InputGroup,
-    InputRightElement, Button, VStack, StackDivider, HStack, background, Image, ButtonGroup, Tag, TagLabel, TagLeftIcon
+    InputRightElement,
+    Button,
+    Tooltip,
+    Checkbox,
+    Stack,
+    StackDivider,
+    Image,
+    useBoolean,
 } from "@chakra-ui/react";
 import capitalize from 'lodash/capitalize';
 import { CgCloseO, CgMathMinus, CgMathPlus } from "react-icons/cg";
 
-import verbsObj from '../verbs.json';
+import _verbsObj from '../verbs.json';
 
 interface Verb {
     verb: string
@@ -21,6 +29,8 @@ interface Verb {
     link: string
     img: string
 }
+
+const verbsObj = _verbsObj as Record<string, Verb>;
 
 export const SearchForm = () => {
     const fuse = React.useMemo(() => new Fuse(Object.values(verbsObj), {
@@ -32,6 +42,7 @@ export const SearchForm = () => {
     const [filterText, setFilterText] = React.useState<string>('');
     const [filteredVerbs, setFilteredVerbs] = React.useState<Fuse.FuseResult<Verb>[]>([]);
     const [selectedVerbs, setSelectedVerbs] = React.useState<Verb['fullVerb'][]>([]);
+    const [isShowingList, { toggle: toggleIsShowingList}] = useBoolean(false);
 
     React.useEffect(() => {
         setFilteredVerbs(fuse.search(filterText));
@@ -43,19 +54,22 @@ export const SearchForm = () => {
 
     return (
         <>
-            <Heading mb="5%">
+            <Heading my="5" display={{ base: 'none', md: 'block'}}>
                 Polish Verbs Conjunctions
             </Heading>
-            <FormControl maxW={"500px"} >
-                <InputGroup size="lg">
+            <FormControl as={Flex} gap={3} alignItems={'center'} justifyContent={'center'} flexWrap={'wrap'}>
+                <InputGroup size="lg" maxW={'500px'}>
                     <Input
                         placeholder="Start typing..."
                         value={filterText}
+                        isDisabled={isShowingList}
                         onChange={e => setFilterText(e.target.value)}
                     />
                     <InputRightElement children={
                         <Button
                             onClick={() => setFilterText('')}
+                            size={'sm'}
+                            variant={'ghost'}
                             isDisabled={!filterText}
                             aria-label="Clear search"
                         >
@@ -63,21 +77,45 @@ export const SearchForm = () => {
                         </Button>
                     } />
                 </InputGroup>
+                <Box p={'3'} flexShrink={0}>
+                    or
+                    <Checkbox
+                        ml={3}
+                        isChecked={isShowingList}
+                        onChange={() => {toggleIsShowingList(); setFilterText('');}}
+                    >
+                        show the full list
+                    </Checkbox>
+                </Box>
             </FormControl>
 
-            <HStack spacing={2}>
-                {['sm', 'md', 'lg'].map((size) => (
-                    <Button leftIcon={<CgMathPlus />} key={size} variant='outline'>
-                        {size}
-                    </Button>
-                ))}
-            </HStack>
+            {isShowingList && (
+                <>
+                    <Stack spacing={3} mt={5} direction='row' flexWrap={'wrap'} justifyContent='center'>
+                        {Object.values(verbsObj).map(({ verb, fullVerb }) => (
+                            <Tooltip key={fullVerb} hasArrow label={fullVerb}>
+                                <Button
+                                    variant={selectedVerbs.includes(fullVerb) ? 'solid' : 'outline'}
+                                    colorScheme={selectedVerbs.includes(fullVerb) ? 'blue' : 'gray'}
+                                    onClick={() => updateSelectedVerbs(fullVerb)}
+
+                                    mb={'3 !important'}
+                                >
+                                    {verb}
+                                </Button>
+                            </Tooltip>
+                        ))}
+                    </Stack>
+                    <Button w={'100%'} onClick={toggleIsShowingList}>Hide list</Button>
+                </>
+            )}
 
             {filteredVerbs.length > 0 && (
-                <VStack
+                <Stack
                     divider={<StackDivider />}
                     borderWidth='1px'
                     borderRadius='md'
+                    direction={'column'}
                     p={3}
                     my={4}
                     w='100%'
@@ -92,22 +130,12 @@ export const SearchForm = () => {
                                 flexWrap={'wrap'}
                                 alignItems={'flex-start'}
                             >
-                                <ButtonGroup
+                                <Button
                                     mr={3}
+                                    onClick={() => updateSelectedVerbs(item.fullVerb)}
                                 >
-                                    <Button
-                                        onClick={() => updateSelectedVerbs(item.fullVerb)}
-                                    >
-                                        {selectedVerbs.includes(item.fullVerb) ? <CgMathMinus /> : <CgMathPlus />}
-                                    </Button>
-                                    <Button
-                                        onClick={() => setFilterText('')}
-                                        isDisabled={!filterText}
-                                        aria-label="Clear search"
-                                    >
-                                        <CgCloseO />
-                                    </Button>
-                                </ButtonGroup>
+                                    {selectedVerbs.includes(item.fullVerb) ? <CgMathMinus /> : <CgMathPlus />}
+                                </Button>
                                 <Heading size={'lg'}>
                                     {capitalize(item.verb)}
                                 </Heading>
@@ -119,50 +147,64 @@ export const SearchForm = () => {
                             </Flex>
                         ))
                     }
-                </VStack>
+                    <Button
+                        onClick={() => setFilterText('')}
+                        isDisabled={!filterText}
+                        my={3}
+                        aria-label="Clear search"
+                    >
+                        Clear search
+                    </Button>
+                </Stack>
             )}
 
-            <VStack
+            <Stack
                 divider={<StackDivider />}
                 borderWidth='1px'
                 borderRadius='md'
+                direction={'column'}
                 p={3}
                 my={4}
                 w='100%'
                 alignItems='stretch'
             >
                 {selectedVerbs.length > 0 ? (
-                    selectedVerbs.map((fullVerb) => (
-                        <Flex
-                            key={fullVerb}
-                            p={3}
-                            borderRadius={'md'}
-                            flexWrap={'wrap'}
-                            alignItems={'flex-start'}
-                        >
-                            <Button
-                                mr={3}
-                                onClick={() => updateSelectedVerbs(fullVerb)}
+                    <>
+                        <Button onClick={() => setSelectedVerbs([])}>Clear all selected</Button>
+                        {selectedVerbs.map((fullVerb) => (
+                            <Flex
+                                key={fullVerb}
+                                p={3}
+                                borderRadius={'md'}
+                                flexWrap={'wrap'}
+                                alignItems={'flex-start'}
                             >
-                                {selectedVerbs.includes(fullVerb) ? <CgMathMinus /> : <CgMathPlus />}
-                            </Button>
-                            <Heading size={'lg'}>
-                                {capitalize(verbsObj[fullVerb].verb)}
-                            </Heading>
-                            <Image
-                                src={'/images/' + verbsObj[fullVerb].img}
-                                alt={verbsObj[fullVerb].fullVerb}
-                                w={'100%'}
-                                h={'auto'}
-                                borderRadius={'3xl'}
-                                mt={3}
-                            />
-                        </Flex>
-                    ))
+                                <Button
+                                    mr={3}
+                                    size={'sm'}
+                                    onClick={() => updateSelectedVerbs(fullVerb)}
+                                >
+                                    {selectedVerbs.includes(fullVerb) ? <CgMathMinus /> : <CgMathPlus />}
+                                </Button>
+                                <Heading size={'lg'}>
+                                    {capitalize(fullVerb)}
+                                </Heading>
+                                <Image
+                                    src={'/images/' + verbsObj[fullVerb].img}
+                                    alt={verbsObj[fullVerb].fullVerb}
+                                    w={'100%'}
+                                    h={'auto'}
+                                    borderRadius={'3xl'}
+                                    mt={3}
+                                />
+                            </Flex>
+                        ))}
+                        <Button onClick={() => setSelectedVerbs([])}>Clear all selected</Button>
+                    </>
                 ) : (
                     <Text textAlign="center" m={5}>Nothin' selected yet</Text>
                 )}
-            </VStack>
+            </Stack>
         </>
     );
 };
