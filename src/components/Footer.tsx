@@ -54,7 +54,7 @@ export const Footer = () => (
             align={{base: 'center', md: 'center'}}
             textAlign={'center'}
         >
-            <Text>© {(new Date).getFullYear()} Yevhen Zhuchenko. All rights reserved</Text>
+            <Text>Made by <a href="https://zhuchenko.com" target="_blank" rel="noreferrer">Yevhen Zhuchenko</a>. Tables from <a href="https://www.tastingpoland.com" target="_blank" rel="noreferrer">Tasting Poland</a></Text>
             <Stack direction={'row'} spacing={6}>
                 <SocialButton label={'Website'} href={'https://zhuchenko.net'}>
                     <CgWebsite />
